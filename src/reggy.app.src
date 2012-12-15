@@ -1,0 +1,10 @@
+{application, reggy,
+ [
+  {description, "Flexible Erlang Process Registries"},
+  {vsn, "1"},
+  {mod, {reggy_app, []}},
+  {modules, [reggy, reggy_app, reggy_sup, reggy_reg]},
+  {registered, []},
+  {applications, [kernel, stdlib]},
+  {env, []}
+ ]}.
