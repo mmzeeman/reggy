@@ -36,11 +36,13 @@
 
 -record(state, {table, pids}).
 
-% @doc
+% @doc Start the registry. The registry itself will also be named.
 %
 start_link({local, Name}=N) ->
     gen_server:start_link(N, ?MODULE, Name, []);
 start_link({global, Name}=N) ->
+    gen_server:start_link(N, ?MODULE, Name, []);
+start_link({via, _Module, Name}=N) when is_atom(Name) ->
     gen_server:start_link(N, ?MODULE, Name, []);
 start_link(Name) ->
     start_link({local, Name}).
@@ -48,18 +50,18 @@ start_link(Name) ->
 
 % @doc Register pid as Name.
 %
-register(RegistryName, Name, Pid) ->
-    gen_server:call(RegistryName, {register, Name, Pid}).
+register(Registry, Name, Pid) ->
+    gen_server:call(Registry, {register, Name, Pid}).
     
 % @doc Unregister Name
 %
-unregister(RegistryName, Name) ->
-    gen_server:call(RegistryName, {unregister, Name}).
+unregister(Registry, Name) ->
+    gen_server:call(Registry, {unregister, Name}).
 
 % @doc Get the pid of the process with Name.
 %
-whereis(RegistryName, Name) ->
-    case ets:lookup(table_name(RegistryName), Name) of
+whereis(Registry, Name) ->
+    case ets:lookup(table_name(Registry), Name) of
         [{Name, _Ref, Pid}] -> 
             Pid;
         _ -> 
@@ -165,5 +167,6 @@ do_unregister(Name, Ref, Pid, #state{table=Table, pids=Pids}=State) ->
 
 %% @doc
 %%
-table_name(RegistryName) ->
+table_name(RegistryName) when is_atom(RegistryName) ->
     erlang:list_to_atom(erlang:atom_to_list(RegistryName) ++ "_reg").
+

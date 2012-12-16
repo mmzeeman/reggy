@@ -33,7 +33,10 @@ start(Name) ->
 %
 % For registering via... {via, reggy, {RegistryName, Name}}
 register_name({RegistryName, Name}, Pid) ->
-	reggy_reg:register(RegistryName, Name, Pid).
+	case reggy_reg:register(RegistryName, Name, Pid) of
+		ok -> yes;
+		_ -> no
+	end.
 
 unregister_name({RegistryName, Name}) ->
 	reggy_reg:unregister(RegistryName, Name).
