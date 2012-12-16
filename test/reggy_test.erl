@@ -28,13 +28,21 @@ multi_reg_t() ->
 
     %% Register a process under multiple names.
     ?assertEqual(undefined, reggy:whereis_name({Reg, 1})),
+    
     ?assertEqual(yes, reggy:register_name({Reg, 1}, self())),
     ?assertEqual(self(), reggy:whereis_name({Reg, 1})),
+    
     ?assertEqual(no, reggy:register_name({Reg, 1}, self())),
     ?assertEqual(self(), reggy:whereis_name({Reg, 1})),
+    
     ?assertEqual(yes, reggy:register_name({Reg, <<"myname">>}, self())),
     ?assertEqual(self(), reggy:whereis_name({Reg, 1})),
     ?assertEqual(self(), reggy:whereis_name({Reg, <<"myname">>})),
+
+    ?assertEqual(ok, reggy:unregister_name({Reg, <<"myname">>})),
+    ?assertEqual(self(), reggy:whereis_name({Reg, 1})),
+    ?assertEqual(undefined, reggy:whereis_name({Reg, <<"myname">>})),
+
     ok.
 
 exit_unregisters_t() ->
