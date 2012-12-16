@@ -17,12 +17,28 @@ application_start_stop_test() ->
 reg_test_() ->
     {foreach, local, fun setup/0, fun teardown/1,
      [ ?_test(exit_unregisters_t()),
-       ?_test(normal_exit_unregisters_t())
+       ?_test(normal_exit_unregisters_t()),
+       ?_test(multi_reg_t())
      ]
     }.
 
+multi_reg_t() ->
+    Reg = multi_reg_t,
+    reggy:start(Reg),
+
+    %% Register a process under multiple names.
+    ?assertEqual(undefined, reggy:whereis_name({Reg, 1})),
+    ?assertEqual(yes, reggy:register_name({Reg, 1}, self())),
+    ?assertEqual(self(), reggy:whereis_name({Reg, 1})),
+    ?assertEqual(no, reggy:register_name({Reg, 1}, self())),
+    ?assertEqual(self(), reggy:whereis_name({Reg, 1})),
+    ?assertEqual(yes, reggy:register_name({Reg, <<"myname">>}, self())),
+    ?assertEqual(self(), reggy:whereis_name({Reg, 1})),
+    ?assertEqual(self(), reggy:whereis_name({Reg, <<"myname">>})),
+    ok.
+
 exit_unregisters_t() ->
-    Reg = exit_unregisters_test_reg,
+    Reg = exit_unregisters_t,
     reggy:start(Reg),
     Self = self(),
     Pid = spawn(fun() -> process(test_proc, Reg, Self) end),
@@ -39,7 +55,7 @@ exit_unregisters_t() ->
     ok.
 
 normal_exit_unregisters_t() ->
-    Reg = normal_exit_unregisters_test_reg,
+    Reg = normal_exit_unregisters_t,
     reggy:start(Reg),
     Self = self(),
     Pid = spawn(fun() -> process(test_proc, Reg, Self) end),
